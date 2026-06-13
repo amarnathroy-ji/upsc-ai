@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UPSC AI — Smart Study Tool</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+
+/* HEADER */
+header{background:#fff;border-bottom:1px solid #e8e8e0;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo-wrap{display:flex;align-items:center;gap:14px}
+.logo-flag{width:48px;height:32px;border-radius:4px;overflow:hidden;border:1px solid #eee;flex-shrink:0;position:relative}
+.flag-saffron{height:33.33%;background:#FF9933}
+.flag-white{height:33.33%;background:#fff;display:flex;align-items:center;justify-content:center}
+.flag-green{height:33.34%;background:#138808}
+.logo-text-wrap{display:flex;flex-direction:column;line-height:1.2}
+.logo-upsc{font-size:22px;font-weight:700;letter-spacing:-0.5px}
+.logo-up{color:#FF9933}.logo-sc{color:#138808}
+.logo-sub{font-size:11px;color:#000080;letter-spacing:3px;font-weight:500}
+nav{display:flex;gap:4px}
+.nav-btn{padding:7px 14px;border:1px solid #e0e0e0;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#555;transition:all 0.15s}
+.nav-btn.active,.nav-btn:hover{background:#f0f0ea;color:#1a1a1a;border-color:#ccc}
+
+/* MAIN */
+main{max-width:760px;margin:0 auto;padding:28px 20px}
+.page{display:none}.page.active{display:block}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #e8e8e0;border-radius:14px;padding:24px;margin-bottom:18px}
+.card-title{font-size:17px;font-weight:600;margin-bottom:6px;color:#1a1a1a}
+.card-desc{font-size:13px;color:#888;margin-bottom:18px}
+.label{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;font-weight:500}
+textarea,input[type=text],input[type=password]{width:100%;border:1px solid #e0e0e0;border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit;color:#1a1a1a;background:#fafaf8;outline:none;line-height:1.6;transition:border 0.15s}
+textarea{resize:vertical}
+textarea:focus,input:focus{border-color:#138808}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.chip{padding:5px 13px;border:1px solid #e0e0e0;border-radius:20px;font-size:13px;cursor:pointer;background:#fff;color:#666;transition:all 0.15s;user-select:none}
+.chip.sel{background:#f0faf5;border-color:#138808;color:#0F6E56;font-weight:500}
+.btn{padding:11px 22px;border:1px solid #e0e0e0;border-radius:9px;background:#fff;color:#1a1a1a;cursor:pointer;font-size:14px;font-weight:500;transition:all 0.15s;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:#f5f5f0;border-color:#bbb}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:#138808;border-color:#138808;color:#fff}
+.btn-primary:hover{background:#0F6E56;border-color:#0F6E56}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.output{background:#fafaf8;border:1px solid #e8e8e0;border-radius:10px;padding:14px;font-size:14px;line-height:1.75;color:#1a1a1a;margin-top:14px;white-space:pre-wrap;min-height:80px;display:none}
+.err{color:#c0392b;font-size:13px;margin-top:8px;display:none}
+.loading{color:#888;font-style:italic;font-size:14px;margin-top:10px;display:none}
+
+/* SCORES */
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;display:none}
+.score-card{background:#fafaf8;border:1px solid #e8e8e0;border-radius:10px;padding:14px;text-align:center}
+.score-num{font-size:26px;font-weight:700;color:#138808}
+.score-lbl{font-size:11px;color:#999;margin-top:3px;text-transform:uppercase;letter-spacing:0.05em}
+
+/* API KEY */
+.api-box{background:#fffef0;border:1px solid #f0e070;border-radius:10px;padding:14px;margin-bottom:14px}
+.api-row{display:flex;gap:8px;margin-top:8px}
+.api-row input{flex:1}
+.key-status{display:flex;align-items:center;gap:8px;font-size:13px;color:#888;margin-top:10px}
+.key-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.key-dot.on{background:#138808}
+
+/* IMAGE */
+.img-box{border:1px solid #e8e8e0;border-radius:10px;overflow:hidden;margin-top:14px;display:none}
+.img-box img{width:100%;display:block}
+
+/* HERO */
+.hero{text-align:center;padding:40px 20px 28px}
+.hero-flag{width:90px;height:60px;border-radius:8px;margin:0 auto 20px;overflow:hidden;border:2px solid #eee;position:relative}
+.hero h1{font-size:36px;font-weight:700;margin-bottom:8px}
+.hero h1 .up{color:#FF9933}.hero h1 .sc{color:#138808}
+.hero p{color:#888;font-size:15px;max-width:420px;margin:0 auto 28px;line-height:1.6}
+.feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:500px;margin:0 auto}
+.feature-card{background:#fff;border:1px solid #e8e8e0;border-radius:12px;padding:16px;text-align:left;cursor:pointer;transition:all 0.15s}
+.feature-card:hover{border-color:#138808;background:#f5fdf7}
+.feature-icon{font-size:22px;margin-bottom:8px}
+.feature-title{font-size:14px;font-weight:600;color:#1a1a1a}
+.feature-desc{font-size:12px;color:#999;margin-top:3px}
+
+/* ASHOKA MINI */
+.chakra-mini{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+
+@media(max-width:600px){
+  nav{display:none}
+  .feature-grid{grid-template-columns:1fr}
+  .hero h1{font-size:28px}
+  .score-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo-flag">
+      <div class="flag-saffron"></div>
+      <div class="flag-white">
+        <svg width="16" height="16" viewBox="-13 -13 26 26">
+          <circle cx="0" cy="0" r="11" fill="none" stroke="#000080" stroke-width="1.2"/>
+          <circle cx="0" cy="0" r="1.8" fill="#000080"/>
+          <g stroke="#000080" stroke-width="0.8" stroke-linecap="round">
+            <line x1="0" y1="-1.8" x2="0" y2="-11"/><line x1="0" y1="1.8" x2="0" y2="11"/>
+            <line x1="-1.8" y1="0" x2="-11" y2="0"/><line x1="1.8" y1="0" x2="11" y2="0"/>
+            <line x1="-1.27" y1="-1.27" x2="-7.78" y2="-7.78"/><line x1="1.27" y1="1.27" x2="7.78" y2="7.78"/>
+            <line x1="1.27" y1="-1.27" x2="7.78" y2="-7.78"/><line x1="-1.27" y1="1.27" x2="-7.78" y2="7.78"/>
+            <line x1="-0.67" y1="-1.94" x2="-4.08" y2="-11.83"/><line x1="0.67" y1="1.94" x2="4.08" y2="11.83"/>
+            <line x1="-1.94" y1="-0.67" x2="-11.83" y2="-4.08"/><line x1="1.94" y1="0.67" x2="11.83" y2="4.08"/>
+            <line x1="-0.67" y1="1.94" x2="-4.08" y2="11.83"/><line x1="0.67" y1="-1.94" x2="4.08" y2="-11.83"/>
+            <line x1="1.94" y1="-0.67" x2="11.83" y2="-4.08"/><line x1="-1.94" y1="0.67" x2="-11.83" y2="4.08"/>
+            <line x1="-1.27" y1="-1.73" x2="-7.76" y2="-10.57"/><line x1="1.27" y1="1.73" x2="7.76" y2="10.57"/>
+            <line x1="-1.73" y1="-1.27" x2="-10.57" y2="-7.76"/><line x1="1.73" y1="1.27" x2="10.57" y2="7.76"/>
+            <line x1="1.27" y1="-1.73" x2="7.76" y2="-10.57"/><line x1="-1.27" y1="1.73" x2="-7.76" y2="10.57"/>
+            <line x1="1.73" y1="-1.27" x2="10.57" y2="-7.76"/><line x1="-1.73" y1="1.27" x2="-10.57" y2="7.76"/>
+          </g>
+        </svg>
+      </div>
+      <div class="flag-green"></div>
+    </div>
+    <div class="logo-text-wrap">
+      <div class="logo-upsc"><span class="logo-up">UP</span><span class="logo-sc">SC</span></div>
+      <div class="logo-sub">AI STUDY TOOL</div>
+    </div>
+  </div>
+  <nav>
+    <button class="nav-btn active" onclick="goPage('home')">Home</button>
+    <button class="nav-btn" onclick="goPage('think')">Deep Think</button>
+    <button class="nav-btn" onclick="goPage('notes')">Notes</button>
+    <button class="nav-btn" onclick="goPage('img')">Image</button>
+    <button class="nav-btn" onclick="goPage('copy')">Copy Check</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-flag">
+      <div class="flag-saffron"></div>
+      <div class="flag-white" style="display:flex;align-items:center;justify-content:center">
+        <svg width="28" height="28" viewBox="-13 -13 26 26">
+          <circle cx="0" cy="0" r="11" fill="none" stroke="#000080" stroke-width="1.2"/>
+          <circle cx="0" cy="0" r="1.8" fill="#000080"/>
+          <g stroke="#000080" stroke-width="0.8" stroke-linecap="round">
+            <line x1="0" y1="-1.8" x2="0" y2="-11"/><line x1="0" y1="1.8" x2="0" y2="11"/>
+            <line x1="-1.8" y1="0" x2="-11" y2="0"/><line x1="1.8" y1="0" x2="11" y2="0"/>
+            <line x1="-1.27" y1="-1.27" x2="-7.78" y2="-7.78"/><line x1="1.27" y1="1.27" x2="7.78" y2="7.78"/>
+            <line x1="1.27" y1="-1.27" x2="7.78" y2="-7.78"/><line x1="-1.27" y1="1.27" x2="-7.78" y2="7.78"/>
+            <line x1="-0.67" y1="-1.94" x2="-4.08" y2="-11.83"/><line x1="0.67" y1="1.94" x2="4.08" y2="11.83"/>
+            <line x1="-1.94" y1="-0.67" x2="-11.83" y2="-4.08"/><line x1="1.94" y1="0.67" x2="11.83" y2="4.08"/>
+            <line x1="-0.67" y1="1.94" x2="-4.08" y2="11.83"/><line x1="0.67" y1="-1.94" x2="4.08" y2="-11.83"/>
+            <line x1="1.94" y1="-0.67" x2="11.83" y2="-4.08"/><line x1="-1.94" y1="0.67" x2="-11.83" y2="4.08"/>
+            <line x1="-1.27" y1="-1.73" x2="-7.76" y2="-10.57"/><line x1="1.27" y1="1.73" x2="7.76" y2="10.57"/>
+            <line x1="-1.73" y1="-1.27" x2="-10.57" y2="-7.76"/><line x1="1.73" y1="1.27" x2="10.57" y2="7.76"/>
+            <line x1="1.27" y1="-1.73" x2="7.76" y2="-10.57"/><line x1="-1.27" y1="1.73" x2="-7.76" y2="10.57"/>
+            <line x1="1.73" y1="-1.27" x2="10.57" y2="-7.76"/><line x1="-1.73" y1="1.27" x2="-10.57" y2="7.76"/>
+          </g>
+        </svg>
+      </div>
+      <div class="flag-green"></div>
+    </div>
+    <h1><span class="up">UP</span><span class="sc">SC</span> AI</h1>
+    <p>AI se padho, sochho, aur UPSC crack karo — Deep Thinking, Short Notes, Image Generation aur Copy Check ek jagah</p>
+    <div class="feature-grid">
+      <div class="feature-card" onclick="goPage('think')">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">Deep Thinking</div>
+        <div class="feature-desc">Multi-angle analysis karo</div>
+      </div>
+      <div class="feature-card" onclick="goPage('notes')">
+        <div class="feature-icon">📝</div>
+        <div class="feature-title">Short Notes</div>
+        <div class="feature-desc">Quick revision notes banao</div>
+      </div>
+      <div class="feature-card" onclick="goPage('img')">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">DALL-E Image</div>
+        <div class="feature-desc">Visual concepts generate karo</div>
+      </div>
+      <div class="feature-card" onclick="goPage('copy')">
+        <div class="feature-icon">✅</div>
+        <div class="feature-title">Copy Check</div>
+        <div class="feature-desc">Answer evaluate karwao</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEEP THINKING -->
+<div class="page" id="page-think">
+  <div class="card">
+    <div class="card-title">🧠 Deep Thinking</div>
+    <div class="card-desc">Koi bhi UPSC topic dalo — AI multiple dimensions se sochega</div>
+    <div class="label">Topic / Question</div>
+    <textarea id="think-in" rows="3" placeholder="Jaise: 'Fundamental Rights aur Directive Principles mein conflict kyu hota hai?'"></textarea>
+    <div class="label" style="margin-top:12px">Subject</div>
+    <div class="chips">
+      <span class="chip sel" onclick="sel(this,'think')">Polity</span>
+      <span class="chip" onclick="sel(this,'think')">History</span>
+      <span class="chip" onclick="sel(this,'think')">Economy</span>
+      <span class="chip" onclick="sel(this,'think')">Geography</span>
+      <span class="chip" onclick="sel(this,'think')">Science & Tech</span>
+      <span class="chip" onclick="sel(this,'think')">Environment</span>
+      <span class="chip" onclick="sel(this,'think')">International Relations</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doThink()">Sochna Shuru Karo →</button>
+    </div>
+    <div class="loading" id="think-load">⏳ Soch raha hoon...</div>
+    <div class="err" id="think-err"></div>
+    <div class="output" id="think-out"></div>
+  </div>
+</div>
+
+<!-- NOTES -->
+<div class="page" id="page-notes">
+  <div class="card">
+    <div class="card-title">📝 Short Notes</div>
+    <div class="card-desc">Topic do, format chuno — ready-made crisp notes milenge</div>
+    <div class="label">Topic</div>
+    <input type="text" id="notes-in" placeholder="Jaise: Non-Cooperation Movement, Article 370, Carbon Credits...">
+    <div class="label" style="margin-top:12px">Notes Style</div>
+    <div class="chips">
+      <span class="chip sel" onclick="sel(this,'notes')">Bullet Points</span>
+      <span class="chip" onclick="sel(this,'notes')">Timeline</span>
+      <span class="chip" onclick="sel(this,'notes')">Mind Map Style</span>
+      <span class="chip" onclick="sel(this,'notes')">Q&A Format</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doNotes()">Notes Banao →</button>
+    </div>
+    <div class="loading" id="notes-load">⏳ Notes ban rahe hain...</div>
+    <div class="err" id="notes-err"></div>
+    <div class="output" id="notes-out"></div>
+  </div>
+</div>
+
+<!-- IMAGE -->
+<div class="page" id="page-img">
+  <div class="card">
+    <div class="card-title">🎨 DALL-E Image Generator</div>
+    <div class="card-desc">OpenAI API key se seedha image generate karo</div>
+    <div class="api-box">
+      <div class="label">OpenAI API Key</div>
+      <div class="api-row">
+        <input type="password" id="oai-key" placeholder="sk-... yahan paste karo">
+        <button class="btn" onclick="saveKey()">✓ Save</button>
+      </div>
+      <div class="key-status">
+        <div class="key-dot" id="key-dot"></div>
+        <span id="key-status">Key nahi hai — <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#138808">platform.openai.com</a> se lao</span>
+      </div>
+    </div>
+    <div class="label">Topic / Concept</div>
+    <input type="text" id="img-in" placeholder="Jaise: Water Cycle, Maurya Empire, Green Revolution...">
+    <div class="label" style="margin-top:12px">Style</div>
+    <div class="chips">
+      <span class="chip sel" onclick="sel(this,'imgstyle')">Educational Infographic</span>
+      <span class="chip" onclick="sel(this,'imgstyle')">Diagram / Flowchart</span>
+      <span class="chip" onclick="sel(this,'imgstyle')">Historical Map</span>
+      <span class="chip" onclick="sel(this,'imgstyle')">Timeline</span>
+      <span class="chip" onclick="sel(this,'imgstyle')">Illustrated Scene</span>
+    </div>
+    <div class="label">Size</div>
+    <div class="chips">
+      <span class="chip sel" onclick="sel(this,'imgsize')">1024x1024</span>
+      <span class="chip" onclick="sel(this,'imgsize')">1792x1024 (Wide)</span>
+      <span class="chip" onclick="sel(this,'imgsize')">1024x1792 (Tall)</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doImage()">Image Banao →</button>
+    </div>
+    <div class="loading" id="img-load">⏳ Image ban rahi hai (10-20 sec)...</div>
+    <div class="err" id="img-err"></div>
+    <div class="img-box" id="img-box"><img id="img-out" src="" alt="Generated image"></div>
+    <div class="btn-row" id="img-dl" style="display:none">
+      <button class="btn" onclick="window.open(document.getElementById('img-out').src)">⬇ Download</button>
+    </div>
+  </div>
+</div>
+
+<!-- COPY CHECK -->
+<div class="page" id="page-copy">
+  <div class="card">
+    <div class="card-title">✅ Copy Check</div>
+    <div class="card-desc">Apna UPSC answer paste karo — AI score aur feedback dega</div>
+    <div class="label">Apna Answer</div>
+    <textarea id="copy-in" rows="7" placeholder="UPSC Mains ya Prelims ke liye apna written answer yahan paste karo..."></textarea>
+    <div class="label" style="margin-top:12px">Question Type</div>
+    <div class="chips">
+      <span class="chip sel" onclick="sel(this,'copy')">GS-1</span>
+      <span class="chip" onclick="sel(this,'copy')">GS-2</span>
+      <span class="chip" onclick="sel(this,'copy')">GS-3</span>
+      <span class="chip" onclick="sel(this,'copy')">GS-4 Ethics</span>
+      <span class="chip" onclick="sel(this,'copy')">Essay</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doCopy()">Copy Check Karo →</button>
+    </div>
+    <div class="loading" id="copy-load">⏳ Check ho raha hai...</div>
+    <div class="err" id="copy-err"></div>
+    <div class="score-grid" id="score-grid">
+      <div class="score-card"><div class="score-num" id="sc1">-</div><div class="score-lbl">Content</div></div>
+      <div class="score-card"><div class="score-num" id="sc2">-</div><div class="score-lbl">Structure</div></div>
+      <div class="score-card"><div class="score-num" id="sc3">-</div><div class="score-lbl">Language</div></div>
+    </div>
+    <div class="output" id="copy-out"></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const CS={think:'Polity',notes:'Bullet Points',imgstyle:'Educational Infographic',imgsize:'1024x1024',copy:'GS-1'};
+let oaiKey='';
+
+function sel(el,g){
+  el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');CS[g]=el.textContent.trim();
+}
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const idx={home:0,think:1,notes:2,img:3,copy:4}[id];
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  window.scrollTo(0,0);
+}
+function saveKey(){
+  const k=document.getElementById('oai-key').value.trim();
+  if(!k.startsWith('sk-')){alert('Invalid key! sk- se shuru hona chahiye');return;}
+  oaiKey=k;
+  document.getElementById('key-dot').classList.add('on');
+  document.getElementById('key-status').textContent='Key connected — image generate kar sakte ho!';
+  document.getElementById('oai-key').value='';
+}
+async function claude(prompt){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message);
+  return d.content.map(c=>c.text||'').join('');
+}
+function showOut(id,txt){const e=document.getElementById(id);e.style.display='block';e.textContent=txt;}
+function showErr(id,txt){const e=document.getElementById(id);e.style.display='block';e.textContent=txt;}
+function hide(id){document.getElementById(id).style.display='none';}
+function show(id){document.getElementById(id).style.display='block';}
+
+async function doThink(){
+  const q=document.getElementById('think-in').value.trim();
+  if(!q){showErr('think-err','Kuch toh likho!');return;}
+  hide('think-err');hide('think-out');show('think-load');
+  try{
+    const r=await claude(`You are a UPSC expert. Answer this ${CS.think} question with deep analytical thinking. Structure: 1) Core concept, 2) Multiple dimensions/perspectives, 3) Examples/case studies, 4) UPSC exam relevance. Be concise but insightful. Hinglish welcome.\n\nQuestion: ${q}`);
+    hide('think-load');showOut('think-out',r);
+  }catch(e){hide('think-load');showErr('think-err','Error: '+e.message);}
+}
+async function doNotes(){
+  const q=document.getElementById('notes-in').value.trim();
+  if(!q){showErr('notes-err','Topic likho!');return;}
+  hide('notes-err');hide('notes-out');show('notes-load');
+  try{
+    const r=await claude(`Create concise UPSC study notes about "${q}" in ${CS.notes} format. Include key facts, dates if relevant, important terms, exam tips. Format neatly. Under 400 words. Hinglish ok.`);
+    hide('notes-load');showOut('notes-out',r);
+  }catch(e){hide('notes-load');showErr('notes-err','Error: '+e.message);}
+}
+async function doImage(){
+  const q=document.getElementById('img-in').value.trim();
+  if(!q){showErr('img-err','Topic likho!');return;}
+  if(!oaiKey){showErr('img-err','Pehle OpenAI API key save karo!');return;}
+  hide('img-err');hide('img-box');hide('img-dl');show('img-load');
+  try{
+    const prompt=await claude(`Write a DALL-E image prompt for "${q}" as a ${CS.imgstyle} for UPSC students. Detailed, educational, clear labels, clean design. 60-80 words only. Return just the prompt text.`);
+    const sizeMap={'1024x1024':'1024x1024','1792x1024 (Wide)':'1792x1024','1024x1792 (Tall)':'1024x1792'};
+    const res=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+oaiKey},body:JSON.stringify({model:'dall-e-3',prompt:prompt.trim(),n:1,size:sizeMap[CS.imgsize]||'1024x1024',response_format:'url'})});
+    const d=await res.json();
+    if(d.error)throw new Error(d.error.message);
+    document.getElementById('img-out').src=d.data[0].url;
+    hide('img-load');show('img-box');show('img-dl');
+  }catch(e){hide('img-load');showErr('img-err','Error: '+e.message);}
+}
+async function doCopy(){
+  const q=document.getElementById('copy-in').value.trim();
+  if(!q){showErr('copy-err','Answer paste karo!');return;}
+  hide('copy-err');hide('copy-out');document.getElementById('score-grid').style.display='none';show('copy-load');
+  try{
+    const r=await claude(`You are a UPSC evaluator checking a ${CS.copy} answer. Respond ONLY as JSON (no markdown): {"content":X,"structure":Y,"language":Z,"feedback":"...","strengths":"...","improvements":"..."} scores out of 10.\n\nAnswer:\n${q}`);
+    let d;try{d=JSON.parse(r.replace(/```json|```/g,'').trim());}catch{hide('copy-load');showOut('copy-out',r);return;}
+    document.getElementById('sc1').textContent=d.content+'/10';
+    document.getElementById('sc2').textContent=d.structure+'/10';
+    document.getElementById('sc3').textContent=d.language+'/10';
+    document.getElementById('score-grid').style.display='grid';
+    hide('copy-load');
+    showOut('copy-out',`📋 Overall:\n${d.feedback}\n\n✅ Strengths:\n${d.strengths}\n\n⚡ Improvements:\n${d.improvements}`);
+  }catch(e){hide('copy-load');showErr('copy-err','Error: '+e.message);}
+}
+</script>
+</body>
+</html>
